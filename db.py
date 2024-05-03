@@ -28,7 +28,7 @@ class Post(db.Model):
     image_path = db.Column(db.String, nullable = True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", back_populates = "posts")
-    comments = db.relationship("Comment", back_populates = "comments")
+    comments = db.relationship("Comment", back_populates = "post",cascade ="delete")
 
     def __init__(self, **kwargs):
         """
@@ -49,7 +49,6 @@ class Post(db.Model):
             "description":self.description,
             "image_path":self.image_path,
             "user_id":self.user_id,
-            "user":[u.simple_serialize() for u in self.user],
             "comments":[c.simple_post_serialize() for c in self.comments]
 
         }
@@ -64,7 +63,6 @@ class Post(db.Model):
             "description":self.description,
             "image_path":self.image_path,
             "user_id":self.user_id,
-            "user":[u.simple_serialize() for u in self.user],
             "comments":[]
 
         }
@@ -85,12 +83,12 @@ class Comment(db.Model):
     """
     Comment model
     """
-    __tablename__ = "comments"
+    __tablename__ = "comment_table"
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     description = db.Column(db.String, nullable = False)
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     author = db.relationship("User", back_populates = "comments")
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
     post = db.relationship("Post", back_populates = "comments")
 
     def __init__(self, **kwargs):
@@ -111,7 +109,7 @@ class Comment(db.Model):
             "author_id":self.author_id,
             "author":[u.simple_serialize() for u in self.author],
             "post_id":self.post_id,
-            "post":[p.simple_serialize() for p in self.post]
+            "post":self.post.simple_serialize() if self.post else None
         }
     
     def simple_post_serialize(self):
@@ -122,7 +120,6 @@ class Comment(db.Model):
             "id":self.id,
             "description":self.description,
             "author_id":self.author_id,
-            "author":[u.simple_serialize() for u in self.author],
         }
     
     def simple_user_serialize(self):
@@ -134,7 +131,7 @@ class Comment(db.Model):
             "description":self.description,
             "user_id":self.author_id,
             "post_id":self.post_id,
-            "post":[p.simple_serialize() for p in self.post]
+            "post":self.post.simple_serialize() if self.post else None
         }
     
 
@@ -152,7 +149,7 @@ class User(db.Model):
     reviews_written_by_user = db.relationship("Review",secondary = reviews_from_user_table,back_populates = "users_reviews")
     reviews_written_for_user = db.relationship("Review",secondary = reviews_for_user_table,back_populates = "users_reviews_receive")
     posts = db.relationship("Post", back_populates = "user")
-    comments = db.relationship("Comment", back_populates = "user")
+    comments = db.relationship("Comment", back_populates = "author")
     
     def __init__(self, **kwargs):
         """

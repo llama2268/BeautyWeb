@@ -80,7 +80,7 @@ def delete_user(user_id):
     db.session.commit()
     return success_response(user.serialize())
 
-@app.route("/api/users/<int:user_id>/reviews/",methods = ["POST"])
+@app.route("/api/users/reviews/",methods = ["POST"])
 def create_review():
     """
     Endpoint for creating a user
@@ -110,7 +110,7 @@ def create_review():
     db.session.commit()
     return success_response(new_review.simple_serialize(),201)
 
-@app.route("/api/users/<int:user_id>/reviews/<int:review_id>/")
+@app.route("/api/users/reviews/<int:review_id>/")
 def get_review(review_id):
     """
     Endpoint for getting a specific user
@@ -147,10 +147,7 @@ def create_post(user_id):
     title = body.get("title")
     description = body.get("description")
     image_path = body.get("image_path")
-    if title not in body:
-        return failure_response("Title not provided")
-    if description not in body:
-        return failure_response("Description not provided")
+
     
     new_post = Post(
         title = title,
@@ -175,6 +172,8 @@ def get_post(user_id,post_id):
         return failure_response("Post not found", 404)
     #if there are no comments under the post, return an empty list for 
     #comments instead
+    return success_response(post.serialize())
+
     try:
         return success_response(post.serialize())
     except:
@@ -200,7 +199,7 @@ def update_post(user_id,post_id):
         return success_response(post.new_serialize())
 
 @app.route("/api/users/<int:user_id>/posts/<int:post_id>/", methods = ["DELETE"])
-def delete_review(user_id,post_id):
+def delete_post(user_id,post_id):
     """
     Endpoint for getting a specific user
     """
@@ -232,10 +231,10 @@ def create_comment(user_id,post_id):
     if not post:
         return failure_response("Post not found", 404)
     description = body.get("description")
-    author_id = body.get("author_id", "")
-    if author_id not in body:
+    author_id = body.get("author_id")
+    if author_id is None:
         return failure_response("Author not provided")
-    if description not in body:
+    if description is None:
         return failure_response("Description not provided")
     new_comment = Comment(
         description = description,
