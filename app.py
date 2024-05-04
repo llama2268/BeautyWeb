@@ -30,7 +30,7 @@ def get_all_users():
     Endpoint for getting all courses
     """
     user = [user.serialize() for user in User.query.all()]
-    return success_response({"Users":user})
+    return success_response([user])
 
 @app.route("/api/users/", methods = ["POST"])
 def create_user():

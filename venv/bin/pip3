@@ -1,4 +1,6 @@
-#!/Users/tyleryang/IntroBackend/Hackathon/venv/bin/python3
+#!/bin/sh
+'''exec' "/Users/ianurquhart/Backend/Hack challenge final project/Hack-Challenge/venv/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
