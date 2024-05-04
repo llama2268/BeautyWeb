@@ -5,6 +5,7 @@ from db import User, Review, Post, Comment
 
 app = Flask(__name__)
 db_filename = "ithacuts.db"
+app.secret_key = 'thesecretkey'
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -37,9 +38,9 @@ def verify_login():
        return failure_response("Invalid User Id")
    if user.check_password(password):
        session["user_id"] = user_id
-       return success_response("Login Successful"),200
+       return success_response("Login Successful",200)
    else:
-       return failure_response("Invalid User ID or Password"),400
+       return failure_response("Invalid User ID or Password",400)
   
 @app.route("/api/users/logout/",methods = ["POST"])
 def verify_logout():
@@ -47,7 +48,7 @@ def verify_logout():
    Endpoint to check if the user successfully logged out
    """
    session.pop("user_id")
-   return success_response("Logout Successful"),200
+   return success_response("Logout Successful",200)
 
 @app.route("/api/users/")
 def get_all_users():
@@ -66,6 +67,7 @@ def create_user():
     username2 = body.get("username")
     bio2 = body.get("bio")
     contacts2 = body.get("contacts")
+    password2 = body.get("password")
     checkusername = User.query.filter_by(username = username2).first()
     if checkusername is not None:
         return failure_response("Username already exists")
@@ -75,7 +77,7 @@ def create_user():
         return failure_response("Missing bio")
     if contacts2 is None:
         return failure_response("Missing contact")
-    new_user = User(username = username2,bio=bio2,contacts=contacts2)
+    new_user = User(username = username2,bio=bio2,contacts=contacts2,password = password2)
 
     if new_user is None:
         return failure_response("Invalid user")
@@ -199,10 +201,6 @@ def get_post(user_id,post_id):
     #comments instead
     return success_response(post.serialize())
 
-    try:
-        return success_response(post.serialize())
-    except:
-        return success_response(post.new_serialize())
     
 @app.route("/api/users/<int:user_id>/posts/<int:post_id>/", methods=["POST"])
 def update_post(user_id,post_id):
