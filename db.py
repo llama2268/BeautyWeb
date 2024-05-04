@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -144,12 +145,19 @@ class User(db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     username = db.Column(db.String, nullable = False)
+    hashed_password = db.Column(db.String, nullable = False)
     bio = db.Column(db.String,nullable = False)
     contacts = db.Column(db.String,nullable = False)
     reviews_written_by_user = db.relationship("Review",secondary = reviews_from_user_table,back_populates = "users_reviews")
     reviews_written_for_user = db.relationship("Review",secondary = reviews_for_user_table,back_populates = "users_reviews_receive")
     posts = db.relationship("Post", back_populates = "user")
     comments = db.relationship("Comment", back_populates = "author")
+
+    def hash_password(self,password):
+        self.hashed_password = generate_password_hash(password)
+
+    def check_password(self,password):
+        return check_password_hash(self.hashed_password,password)
     
     def __init__(self, **kwargs):
         """
@@ -158,6 +166,8 @@ class User(db.Model):
         self.username = kwargs.get("username","")
         self.bio = kwargs.get("bio","")
         self.contacts = kwargs.get("contacts","")
+        self.hash_password(kwargs.get("password"))
+    
     
     def serialize(self):
         """

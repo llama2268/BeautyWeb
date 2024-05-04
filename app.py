@@ -1,5 +1,5 @@
 from db import db
-from flask import Flask, request
+from flask import Flask, request, session
 from flask import json
 from db import User, Review, Post, Comment
 
@@ -23,6 +23,31 @@ def failure_response(message,code = 404):
 
 
 # your routes here
+
+@app.route("/api/users/login",methods = ["POST"])
+def verify_login():
+   """
+   Endpoint to check if the login is successful
+   """
+   body = json.loads(request.data)
+   user_id = body.get("user_id")
+   password = body.get("password")
+   user = User.query.filter_by(id=user_id).first()
+   if user is None:
+       return failure_response("Invalid User Id")
+   if user.check_password(password):
+       session["user_id"] = user_id
+       return success_response("Login Successful"),200
+   else:
+       return failure_response("Invalid User ID or Password"),400
+  
+@app.route("/api/users/logout/",methods = ["POST"])
+def verify_logout():
+   """
+   Endpoint to check if the user successfully logged out
+   """
+   session.pop("user_id")
+   return success_response("Logout Successful"),200
 
 @app.route("/api/users/")
 def get_all_users():
