@@ -25,28 +25,30 @@ def failure_response(message,code = 404):
 
 # your routes here
 
-@app.route("/api/users/login",methods = ["POST"])
+@app.route("/api/users/login/",methods = ["POST"])
 def verify_login():
    """
    Endpoint to check if the login is successful
    """
    body = json.loads(request.data)
-   user_id = body.get("user_id")
+   username = body.get("username")
    password = body.get("password")
-   user = User.query.filter_by(id=user_id).first()
+   user = User.query.filter_by(username = username).first()
    if user is None:
-       return failure_response("Invalid User Id")
+       return failure_response("Invalid Username")
    if user.check_password(password):
-       session["user_id"] = user_id
+       session["user_id"] = username
        return success_response("Login Successful",200)
    else:
-       return failure_response("Invalid User ID or Password",400)
+       return failure_response("Invalid User ID or Password",404)
   
 @app.route("/api/users/logout/",methods = ["POST"])
 def verify_logout():
    """
    Endpoint to check if the user successfully logged out
    """
+   if "user_id" not in session:
+       return failure_response("No users are currently logged in",404)
    session.pop("user_id")
    return success_response("Logout Successful",200)
 
@@ -200,6 +202,7 @@ def get_post(user_id,post_id):
     #if there are no comments under the post, return an empty list for 
     #comments instead
     return success_response(post.serialize())
+
 
     
 @app.route("/api/users/<int:user_id>/posts/<int:post_id>/", methods=["POST"])
