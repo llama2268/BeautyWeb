@@ -6,7 +6,6 @@ from db import User, Review, Post, Comment
 app = Flask(__name__)
 db_filename = "ithacuts.db"
 app.secret_key = 'thesecretkey'
-print("Ian sucks")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
